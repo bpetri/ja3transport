@@ -1,6 +1,7 @@
 package ja3transport
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -46,8 +47,15 @@ func NewWithString(ja3 string) (*JA3Client, error) {
 // Do sends an HTTP request and returns an HTTP response, following policy
 // (such as redirects, cookies, auth) as configured on the client.
 func (c *JA3Client) Do(req *http.Request) (*http.Response, error) {
-	if _, ok := req.Header["User-Agent"]; !ok && c.Browser.UserAgent != "" {
-		req.Header.Set("User-Agent", c.Browser.UserAgent)
+
+	for _, element := range c.Browser.Header {
+		kv := strings.Split(element, ":")
+
+		if len(kv) == 2 {
+			req.Header.Set(kv[0], kv[1])
+		} else {
+			fmt.Println("Error while adding Header ", element)
+		}
 	}
 
 	return c.Client.Do(req)
